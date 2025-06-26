@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"context"
 	"encoding/csv"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -57,21 +59,27 @@ func main() {
 	}
 
 	done := make(chan any)
+	timeStart := time.Now()
 
 	run := runner(done, ReadFileAsyncStream(done, client, bucket, key),
-		10,
+		50, // Number of workers
 		showStream,
 		StepTransformTextAsynStream,
 		StepStoreDataAsynStream,
 	)
 	run()
 
+	timeSince := time.Since(timeStart)
+	log.Printf("Total time taken: %s", timeSince)
 }
 
 func showStream(stream <-chan string) {
+	count := 0
 	for s := range stream {
+		count++
 		log.Println(s)
 	}
+	fmt.Printf("Total records processed: %d\n", count)
 }
 
 func ReadFileAsyncStream(done <-chan any, client *s3.Client, bucket, key string) <-chan string {
@@ -145,6 +153,7 @@ func StepStoreDataAsynStream(done <-chan any, streamIn <-chan string, workers in
 						return
 					}
 					// Store in database or any other storage
+					time.Sleep(50 * time.Millisecond) // Simulate some processing delay
 					streamOut <- s
 				}
 			}
@@ -174,7 +183,11 @@ func StepTransformTextAsynStream(done <-chan any, streamIn <-chan string, worker
 					if !ok {
 						return
 					}
-					streamOut <- TransformText(s, TransformToUpper, TransformToLower)
+					streamOut <- TransformText(s,
+						TransformToUpper,
+						TransformToLower,
+						TransformGetPhone,
+					)
 				}
 			}
 		}()
@@ -206,4 +219,10 @@ func TransformToUpper(a string) string {
 func TransformToLower(b string) string {
 	// Transformación de ejemplo: convertir a minúsculas
 	return strings.ToLower(b)
+}
+
+func TransformGetPhone(c string) string {
+	// obtener el número de teléfono
+	parts := strings.Split(c, ",")
+	return strings.TrimSpace(parts[1]) // Asumiendo que el número de teléfono está en la segunda columna
 }
