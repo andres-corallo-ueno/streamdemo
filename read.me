@@ -1,0 +1,27 @@
+
+* Run Docker Composer Infrastructure
+> docker-composer up -d
+
+* Configure aws-cli
+> docker exec -ti aws_cli bash
+
+bash-4.2# aws configure
+
+    * set the following values:
+    WS Access Key ID: test
+    AWS Secret Access Key: test
+    Default region: us-east-1
+    Output format: json
+
+* Create S3 Bucket 
+ bash-4.2# aws --endpoint-url=http://localstack:4566 s3 mb s3://mi-bucket
+
+* Check bucket
+bash-4.2# bash-4.2# aws --endpoint-url=http://localstack:4566 s3 ls               
+2025-06-26 10:52:44 mi-bucket
+
+* Upload file from local to S3
+bash-4.2# aws --endpoint-url=http://localstack:4566 s3 cp /repo/bucket-10-keywords/details-1a99313b-677c-4c00-addf-2f117715258a.csv s3://mi-bucket/details-1a99313b-677c-4c00-addf-2f117715258a.csv --acl public-read
+
+* Check file
+bash-4.2# aws --endpoint-url=http://localstack:4566 s3 ls s3://mi-bucket
