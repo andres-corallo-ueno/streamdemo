@@ -22,6 +22,7 @@ bash-4.2# bash-4.2# aws --endpoint-url=http://localstack:4566 s3 ls
 
 * Upload file from local to S3
 bash-4.2# aws --endpoint-url=http://localstack:4566 s3 cp /repo/bucket-10-keywords/details-1a99313b-677c-4c00-addf-2f117715258a.csv s3://mi-bucket/details-1a99313b-677c-4c00-addf-2f117715258a.csv --acl public-read
-
+bash-4.2# aws --endpoint-url=http://localstack:4566 s3 cp /repo/ds-metrics.gif s3://mi-bucket/ds-metrics.gif --acl public-read
 * Check file
 bash-4.2# aws --endpoint-url=http://localstack:4566 s3 ls s3://mi-bucket
+
